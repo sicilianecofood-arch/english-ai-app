@@ -1,0 +1,282 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>English Phrase Trainer</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+
+body{
+font-family:'Inter',sans-serif;
+background:linear-gradient(135deg,#6C63FF,#FF6FD8);
+display:flex;
+align-items:center;
+justify-content:center;
+height:100vh;
+margin:0;
+}
+
+.app{
+background:white;
+width:380px;
+border-radius:28px;
+padding:30px;
+box-shadow:0 25px 60px rgba(0,0,0,0.3);
+text-align:center;
+}
+
+h1{
+margin-bottom:5px;
+}
+
+.mode{
+margin-bottom:15px;
+}
+
+.mode button{
+margin:4px;
+padding:6px 12px;
+border:none;
+border-radius:10px;
+background:#6C63FF;
+color:white;
+cursor:pointer;
+}
+
+.card{
+background:#f6f6ff;
+border-radius:20px;
+padding:30px;
+margin:20px 0;
+}
+
+.phrase{
+font-size:26px;
+font-weight:700;
+}
+
+.translation{
+font-size:20px;
+color:#666;
+margin-top:10px;
+display:none;
+}
+
+button.main{
+margin-top:10px;
+padding:12px 20px;
+border:none;
+border-radius:20px;
+background:#FF6FD8;
+color:white;
+cursor:pointer;
+}
+
+.quiz-options button{
+display:block;
+width:100%;
+margin:8px 0;
+padding:10px;
+border:none;
+border-radius:12px;
+background:#6C63FF;
+color:white;
+cursor:pointer;
+}
+
+.score{
+margin-top:10px;
+color:#444;
+}
+
+.result{
+margin-top:10px;
+font-weight:bold;
+min-height:20px;
+}
+
+</style>
+</head>
+<body>
+
+<div class="app">
+
+<h1>English Trainer</h1>
+<p>Learn useful phrases</p>
+
+<div class="mode">
+<button onclick="setMode('learn')">Learn</button>
+<button onclick="setMode('quiz')">Quiz</button>
+</div>
+
+<div class="card">
+
+<div class="phrase" id="phrase">Hello</div>
+<div class="translation" id="translation">Ciao</div>
+
+</div>
+
+<div id="controls">
+
+<button class="main" onclick="speak()">🔊 Pronunciation</button>
+<button class="main" onclick="showTranslation()">🇮🇹 Show Italian</button>
+<button class="main" onclick="nextPhrase()">➡ Next</button>
+
+</div>
+
+<div id="quiz" style="display:none">
+
+<div class="quiz-options" id="options"></div>
+
+<div class="result" id="result"></div>
+
+</div>
+
+<div class="score">
+Score: <span id="score">0</span>
+</div>
+
+</div>
+
+<script>
+
+let mode="learn"
+let score=0
+
+const phrases=[
+{en:"Hello",it:"Ciao"},
+{en:"How are you?",it:"Come stai?"},
+{en:"Thank you",it:"Grazie"},
+{en:"Please",it:"Per favore"},
+{en:"Good morning",it:"Buongiorno"},
+{en:"Good evening",it:"Buonasera"},
+{en:"I am hungry",it:"Ho fame"},
+{en:"I am thirsty",it:"Ho sete"},
+{en:"Where is the toilet?",it:"Dov'è il bagno?"},
+{en:"I live in the city",it:"Vivo in città"},
+{en:"I study at school",it:"Studio a scuola"},
+{en:"My name is...",it:"Mi chiamo..."},
+{en:"Nice to meet you",it:"Piacere"},
+{en:"I don't understand",it:"Non capisco"},
+{en:"See you later",it:"A dopo"},
+{en:"What time is it?",it:"Che ore sono?"}
+]
+
+let current=0
+let correct=""
+
+function setMode(m){
+
+mode=m
+
+document.getElementById("result").innerText=""
+
+if(mode==="learn"){
+document.getElementById("controls").style.display="block"
+document.getElementById("quiz").style.display="none"
+}else{
+document.getElementById("controls").style.display="none"
+document.getElementById("quiz").style.display="block"
+loadQuiz()
+}
+
+}
+
+function update(){
+
+document.getElementById("phrase").innerText=phrases[current].en
+document.getElementById("translation").innerText=phrases[current].it
+document.getElementById("translation").style.display="none"
+
+}
+
+function nextPhrase(){
+
+current=Math.floor(Math.random()*phrases.length)
+update()
+
+}
+
+function showTranslation(){
+
+document.getElementById("translation").style.display="block"
+
+}
+
+function speak(){
+
+const utter=new SpeechSynthesisUtterance(phrases[current].en)
+utter.lang="en-US"
+speechSynthesis.speak(utter)
+
+}
+
+function shuffle(a){
+return a.sort(()=>Math.random()-0.5)
+}
+
+function loadQuiz(){
+
+let q=phrases[Math.floor(Math.random()*phrases.length)]
+correct=q.it
+
+document.getElementById("phrase").innerText=q.en
+
+let options=[correct]
+
+while(options.length<3){
+
+let rand=phrases[Math.floor(Math.random()*phrases.length)].it
+
+if(!options.includes(rand)){
+options.push(rand)
+}
+
+}
+
+options=shuffle(options)
+
+const container=document.getElementById("options")
+container.innerHTML=""
+
+options.forEach(opt=>{
+
+let btn=document.createElement("button")
+btn.innerText=opt
+
+btn.onclick=()=>checkAnswer(opt)
+
+container.appendChild(btn)
+
+})
+
+}
+
+function checkAnswer(answer){
+
+if(answer===correct){
+
+document.getElementById("result").innerText="🎉 Correct!"
+score++
+document.getElementById("score").innerText=score
+
+setTimeout(loadQuiz,900)
+
+}else{
+
+document.getElementById("result").innerText="❌ Try again"
+
+}
+
+}
+
+update()
+
+</script>
+
+</body>
+</html>
